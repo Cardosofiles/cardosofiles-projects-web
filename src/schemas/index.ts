@@ -7,7 +7,7 @@ export const addressSchema = z.object({
   city: z.string().min(2, 'Cidade obrigatória'),
   state: z.string().min(2, 'Estado obrigatório'),
   number: z.string().min(1, 'Número obrigatório'),
-  complement: z.string().min(1, 'Obrigatório (caso não tenha, coloque "Sem")'),
+  complement: z.string().optional(),
 })
 
 export const clienteSchema = z.object({

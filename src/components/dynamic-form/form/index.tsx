@@ -16,23 +16,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
 
-import { formClientCreate } from '@/actions/dynamic-form/form'
-import { cn } from '@/lib/utils'
+import { formActionClientCreate } from '@/actions/dynamic-form/form'
+
 import { clienteSchema, type ClienteFormData } from '@/schemas'
 
-type FormClienteProps = {
-  defaultValues?: ClienteFormData
-  mode?: 'create' | 'edit'
-  clientId?: string
-  onClose?: () => void
-}
+import { cn } from '@/lib/utils'
 
-const FormCliente = ({
-  defaultValues,
-  mode = 'create',
-  clientId,
-  onClose,
-}: FormClienteProps): JSX.Element => {
+const FormCreateCliente = (): JSX.Element => {
   const [error, setError] = useState<string>()
   const [success, setSuccess] = useState<string>()
 
@@ -59,7 +49,7 @@ const FormCliente = ({
     setSuccess('')
 
     startTransition(() => {
-      formClientCreate(data).then(values => {
+      formActionClientCreate(data).then(values => {
         if (values) {
           setError(values.error ?? undefined)
           if (!values.error) {
@@ -77,7 +67,7 @@ const FormCliente = ({
         <form
           onSubmit={handleSubmit(handleSave)}
           className={cn(
-            'mx-auto my-5 max-w-6xl space-y-6 rounded-2xl bg-transparent p-5 shadow-none md:p-0'
+            'mx-auto my-5 space-y-6 rounded-2xl bg-transparent shadow-none md:p-0 lg:max-w-6xl lg:p-5'
           )}
         >
           {/* Card: Informações Básicas */}
@@ -129,12 +119,12 @@ const FormCliente = ({
 
           <Messages error={error} success={success} />
 
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-col gap-2 md:flex-row md:justify-end lg:flex-row lg:justify-end">
             <Button
               disabled={isPending}
               variant="outline"
               type="button"
-              className="hover:bg-primary/10 mt-6 w-full max-w-48 cursor-pointer"
+              className="hover:bg-primary/10 mt-6 w-full cursor-pointer md:max-w-28 lg:max-w-48"
               onClick={() => reset()}
             >
               <X className="mr-2 h-4 w-4" />
@@ -144,7 +134,7 @@ const FormCliente = ({
             <Button
               disabled={isPending}
               type="submit"
-              className="mt-6 w-full max-w-64 cursor-pointer"
+              className="mt-6 w-full cursor-pointer md:max-w-40 lg:max-w-64"
             >
               {isPending ? (
                 <>
@@ -165,4 +155,4 @@ const FormCliente = ({
   )
 }
 
-export { FormCliente }
+export { FormCreateCliente }

@@ -6,15 +6,18 @@ export type Address = {
   city: string
   state: string
   number: string
-  complement?: string
+  complement?: string | null
+  clientId?: string
 }
 
 export type Client = {
   id?: string
   name: string
   cpfCnpj: string
-  birthDate: string
+  birthDate: string | Date
   email: string
   phone: string
   addresses: Address[]
+  createdAt?: Date
+  updatedAt?: Date
 }

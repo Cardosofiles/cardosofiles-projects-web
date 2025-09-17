@@ -4,6 +4,7 @@ import { db } from '@/lib/prisma-bd'
 import { type ClienteFormData, clienteSchema } from '@/schemas'
 import { getClientByCpfCnpj, getClientByEmail, getClientByNumber } from '@/services/client'
 
+// Converte "DD/MM/YYYY" ou "YYYY-MM-DD" para Date
 function parseDateToDateObj(dateStr: string): Date | null {
   // Espera "DD/MM/YYYY" ou "YYYY-MM-DD"
   if (!dateStr) return null
@@ -20,7 +21,8 @@ function parseDateToDateObj(dateStr: string): Date | null {
   return new Date(dateStr)
 }
 
-export const formClientCreate = async (data: ClienteFormData) => {
+// ✅ Criar cliente
+export const formActionClientCreate = async (data: ClienteFormData) => {
   try {
     const validatedFields = clienteSchema.safeParse(data)
 
@@ -86,36 +88,78 @@ export const formClientCreate = async (data: ClienteFormData) => {
   }
 }
 
-export const formClientUpdate = async (id: string, data: ClienteFormData) => {
+// ✅ Ler todos os clientes
+export const formActionGetClient = async () => {
   try {
-    const validatedFields = clienteSchema.safeParse(data)
-    if (!validatedFields.success) {
-      return { error: 'Dados inválidos.' }
+    const clients = await db.client.findMany({
+      include: { addresses: true },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    return { success: true, data: clients }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
+// ✅ Ler cliente por ID
+export const formActionGetClientById = async (id: string) => {
+  try {
+    const client = await db.client.findUnique({
+      where: { id },
+      include: { addresses: true },
+    })
+
+    if (!client) {
+      return { success: false, error: 'Cliente não encontrado' }
     }
 
-    const { name, cpfCnpj, birthDate, email, phone, addresses } = validatedFields.data
+    return { success: true, data: client }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
 
-    const normalizedEmail = email.trim().toLowerCase()
-    const normalizedCpfCnpj = cpfCnpj.replace(/\D/g, '')
-
-    await db.client.update({
+// ✅ Editar cliente
+export const formActionUpdateClient = async (id: string, data: ClienteFormData) => {
+  try {
+    const updated = await db.client.update({
       where: { id },
       data: {
-        name,
-        email: normalizedEmail,
-        cpfCnpj: normalizedCpfCnpj,
-        birthDate: birthDate ? new Date(birthDate) : undefined,
-        phone,
+        name: data.name,
+        cpfCnpj: data.cpfCnpj,
+        birthDate: new Date(data.birthDate),
+        email: data.email,
+        phone: data.phone,
         addresses: {
-          deleteMany: {}, // remove todos os antigos
-          create: addresses, // recria atualizados
+          deleteMany: {}, // apaga os antigos
+          create: data.addresses.map(addr => ({
+            cep: addr.cep,
+            street: addr.street,
+            city: addr.city,
+            state: addr.state,
+            number: addr.number,
+            complement: addr.complement,
+            neighborhood: addr.neighborhood,
+          })),
         },
       },
+      include: { addresses: true },
     })
+
+    return { success: true, data: updated }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
+// ✅ Deletar cliente
+export const formActionDeleteClient = async (id: string) => {
+  try {
+    await db.client.delete({ where: { id } })
 
     return { success: true }
   } catch (error: any) {
-    console.error(error)
-    return { error: 'Erro ao atualizar cliente.' }
+    return { success: false, error: error.message }
   }
 }
