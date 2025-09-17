@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 import { Loader2, Pencil, Trash2 } from 'lucide-react'
-import type { JSX } from 'react'
+import { useState, type JSX } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -19,6 +19,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Client } from '@/types'
 
 const TableClient = (): JSX.Element => {
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+
   const fetchClients = async (): Promise<Client[]> => {
     const { data } = await axios.get('/api/form')
     return data

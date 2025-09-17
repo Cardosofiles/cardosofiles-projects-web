@@ -85,3 +85,37 @@ export const formClientCreate = async (data: ClienteFormData) => {
     return { error: 'Erro ao criar cliente.' }
   }
 }
+
+export const formClientUpdate = async (id: string, data: ClienteFormData) => {
+  try {
+    const validatedFields = clienteSchema.safeParse(data)
+    if (!validatedFields.success) {
+      return { error: 'Dados inválidos.' }
+    }
+
+    const { name, cpfCnpj, birthDate, email, phone, addresses } = validatedFields.data
+
+    const normalizedEmail = email.trim().toLowerCase()
+    const normalizedCpfCnpj = cpfCnpj.replace(/\D/g, '')
+
+    await db.client.update({
+      where: { id },
+      data: {
+        name,
+        email: normalizedEmail,
+        cpfCnpj: normalizedCpfCnpj,
+        birthDate: birthDate ? new Date(birthDate) : undefined,
+        phone,
+        addresses: {
+          deleteMany: {}, // remove todos os antigos
+          create: addresses, // recria atualizados
+        },
+      },
+    })
+
+    return { success: true }
+  } catch (error: any) {
+    console.error(error)
+    return { error: 'Erro ao atualizar cliente.' }
+  }
+}

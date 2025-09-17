@@ -20,7 +20,19 @@ import { formClientCreate } from '@/actions/dynamic-form/form'
 import { cn } from '@/lib/utils'
 import { clienteSchema, type ClienteFormData } from '@/schemas'
 
-const FormCliente = (): JSX.Element => {
+type FormClienteProps = {
+  defaultValues?: ClienteFormData
+  mode?: 'create' | 'edit'
+  clientId?: string
+  onClose?: () => void
+}
+
+const FormCliente = ({
+  defaultValues,
+  mode = 'create',
+  clientId,
+  onClose,
+}: FormClienteProps): JSX.Element => {
   const [error, setError] = useState<string>()
   const [success, setSuccess] = useState<string>()
 

@@ -115,7 +115,7 @@ const AddressesField = ({ control }: AddressesFieldProps): JSX.Element => {
             />
 
             {/* Bairro, Cidade e Estado */}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
               <FormField
                 control={control}
                 name={`addresses.${index}.neighborhood`}
