@@ -1,6 +1,6 @@
 'use client'
 
-import { Loader2, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Loader2, Pencil, Plus, Save, Trash2, X } from 'lucide-react'
 import type { JSX } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -28,10 +28,12 @@ import { DateBirth } from '@/components/dynamic-form/form/date-birth'
 import { DocsField } from '@/components/dynamic-form/form/docs-field'
 import { EmailField } from '@/components/dynamic-form/form/email-field'
 import { NameField } from '@/components/dynamic-form/form/name-field'
+import { ClientSearch } from '@/components/dynamic-form/table/table-search'
 
 import { useClientForm } from '@/hooks/dynamic-form/useClientForm'
 import { useCreateUpdateClient, useDeleteClient } from '@/hooks/dynamic-form/useClientMutations'
 import { useClientList } from '@/hooks/dynamic-form/useClientQueries'
+import { useClientSearch } from '@/hooks/dynamic-form/useClientSearch'
 import { useClientTable } from '@/hooks/dynamic-form/useClientTable'
 
 import type { ClienteFormData } from '@/schemas'
@@ -54,6 +56,10 @@ const TableListClient = (): JSX.Element => {
     closeModal,
     closeDeleteDialog,
   } = useClientTable()
+
+  // Hook de busca
+  const { filteredClients, handleSearch, handleClearSearch, isSearchActive, searchFilters } =
+    useClientSearch(data)
 
   const handleOnEdit = async (id: string) => {
     const client = await handleEdit(id)
@@ -112,6 +118,9 @@ const TableListClient = (): JSX.Element => {
         </Button>
       </div>
 
+      {/* Componente de busca */}
+      <ClientSearch onSearch={handleSearch} onClear={handleClearSearch} />
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -127,7 +136,7 @@ const TableListClient = (): JSX.Element => {
           </TableHeader>
 
           <TableBody>
-            {data?.map(cliente => (
+            {filteredClients?.map(cliente => (
               <TableRow key={cliente.id}>
                 <TableCell className="font-medium">{cliente.name}</TableCell>
                 <TableCell className="font-mono text-sm">
@@ -166,6 +175,7 @@ const TableListClient = (): JSX.Element => {
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
+
                   <Button
                     variant="destructive"
                     size="icon"
@@ -178,16 +188,29 @@ const TableListClient = (): JSX.Element => {
               </TableRow>
             ))}
 
-            {data?.length === 0 && (
+            {filteredClients?.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-muted-foreground text-center">
-                  Nenhum cliente cadastrado
+                  {isSearchActive
+                    ? `Nenhum cliente encontrado para "${searchFilters?.searchTerm}"`
+                    : 'Nenhum cliente cadastrado'}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
+
+      {/* Indicador de resultados */}
+      {isSearchActive && filteredClients && filteredClients.length > 0 && (
+        <div className="text-muted-foreground text-sm">
+          <span>
+            {filteredClients.length} cliente{filteredClients.length !== 1 ? 's' : ''} encontrado
+            {filteredClients.length !== 1 ? 's' : ''}
+            {data && ` de ${data.length} total`}
+          </span>
+        </div>
+      )}
 
       {/* Modal de Edição/Criação Combinado */}
       <Dialog open={isEditing || isCreating} onOpenChange={open => !open && closeModal()}>
@@ -226,8 +249,10 @@ const TableListClient = (): JSX.Element => {
                   onClick={closeModal}
                   className="flex-1 md:flex-none"
                 >
+                  <X className="h-4 w-4" />
                   Cancelar
                 </Button>
+
                 <Button
                   type="submit"
                   disabled={updateMutation.isPending}
@@ -240,9 +265,15 @@ const TableListClient = (): JSX.Element => {
                       {isCreating ? 'Criando...' : 'Salvando...'}
                     </>
                   ) : isCreating ? (
-                    'Criar Cliente'
+                    <>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Criar Cliente
+                    </>
                   ) : (
-                    'Salvar Alterações'
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Salvar Alterações
+                    </>
                   )}
                 </Button>
               </div>
@@ -263,6 +294,7 @@ const TableListClient = (): JSX.Element => {
           <DialogFooter>
             <div className="flex w-full gap-3 md:w-auto">
               <Button variant="outline" onClick={closeDeleteDialog} className="flex-1 md:flex-none">
+                <X className="h-4 w-4" />
                 Cancelar
               </Button>
               <Button
