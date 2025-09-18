@@ -10,10 +10,34 @@ export const addressSchema = z.object({
   complement: z.string().optional(),
 })
 
+// Validação customizada para data DD/MM/YYYY
+const dateValidation = z.string().refine(
+  date => {
+    if (!date) return false
+
+    // Verificar formato DD/MM/YYYY
+    const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/
+    if (!dateRegex.test(date)) return false
+
+    // Verificar se é uma data válida
+    const [day, month, year] = date.split('/').map(Number)
+    const dateObj = new Date(year, month - 1, day)
+
+    return (
+      dateObj.getDate() === day &&
+      dateObj.getMonth() === month - 1 &&
+      dateObj.getFullYear() === year
+    )
+  },
+  {
+    message: 'Data deve estar no formato DD/MM/YYYY e ser válida',
+  }
+)
+
 export const clienteSchema = z.object({
   name: z.string().min(3, 'Nome obrigatório'),
   cpfCnpj: z.string().min(11, 'CPF/CNPJ inválido'),
-  birthDate: z.string().min(10, 'Data inválida'),
+  birthDate: dateValidation, // Usar validação customizada
   email: z.string().email('Email inválido'),
   phone: z.string().min(14, 'Telefone inválido'),
   addresses: z.array(addressSchema).min(1, 'Informe ao menos um endereço'),

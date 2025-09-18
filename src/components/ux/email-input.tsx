@@ -46,6 +46,8 @@ const EmailProviderSelector = ({
 }: EmailProviderSelectorProps): JSX.Element => {
   const [showProviders, setShowProviders] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [popoverFocused, setPopoverFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
@@ -148,7 +150,7 @@ const EmailProviderSelector = ({
 
       <PopoverContent
         className={cn(
-          'mt-1.5 w-[302px] p-3 lg:w-[1104px]',
+          'mt-1.5 w-[302px] p-3 lg:w-[462px]',
           // light styles
           'bg-white [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]',
           // dark styles
@@ -170,9 +172,6 @@ const EmailProviderSelector = ({
             <p className="text-muted-foreground text-xs font-medium">
               Selecione um provedor de email:
             </p>
-            {/* <p className="text-muted-foreground text-xs">
-              Tab ↑↓ Enter {popoverFocused && '(Focado)'}
-            </p> */}
           </div>
           <div className="space-y-1">
             {providers.map((provider, index) => (
