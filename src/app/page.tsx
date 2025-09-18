@@ -1,4 +1,5 @@
 import { ArrowRight, Code2, Github, Globe, Linkedin, Mail, Rocket, Zap } from 'lucide-react'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import type { JSX } from 'react'
 
@@ -6,6 +7,39 @@ import { SectionProjects } from '@/components/layout/section'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+
+export const metadata: Metadata = {
+  title: 'Home - Portfolio de Desenvolvedor Full Stack',
+  description:
+    'Cardoso Files - Desenvolvedor Full Stack com 2+ anos de experiência em React, Next.js, TypeScript e Node.js. Explore 12 projetos demonstrando expertise em desenvolvimento web moderno.',
+  keywords: [
+    'cardoso files',
+    'desenvolvedor full stack brasil',
+    'react developer portfolio',
+    'nextjs projetos',
+    'typescript developer',
+    'portfolio desenvolvedor',
+    'projetos web react',
+    'desenvolvedor frontend backend',
+  ],
+  openGraph: {
+    title: 'Cardoso Files - Portfolio de Desenvolvedor Full Stack',
+    description:
+      'Explore 12 projetos inovadores desenvolvidos com React, Next.js e TypeScript. Desde formulários dinâmicos até dashboards complexos.',
+    url: 'https://cardosofiles-projects-web.vercel.app',
+    images: [
+      {
+        url: '/og-home.png',
+        width: 1200,
+        height: 630,
+        alt: 'Portfolio Cardoso Files - Projetos Full Stack',
+      },
+    ],
+  },
+  alternates: {
+    canonical: 'https://cardosofiles-projects-web.vercel.app',
+  },
+}
 
 const Home = (): JSX.Element => {
   return (
