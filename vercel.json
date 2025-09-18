@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm run vercel-build",
+  "framework": "nextjs",
+  "functions": {
+    "app/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "regions": [
+    "gru1"
+  ]
+}
