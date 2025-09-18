@@ -156,6 +156,7 @@ const TableListClient = (): JSX.Element => {
                     ))}
                   </ul>
                 </TableCell>
+
                 <TableCell className="flex gap-2">
                   <Button
                     variant="outline"
@@ -190,31 +191,49 @@ const TableListClient = (): JSX.Element => {
 
       {/* Modal de Edição/Criação Combinado */}
       <Dialog open={isEditing || isCreating} onOpenChange={open => !open && closeModal()}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>{isCreating ? 'Novo Cliente' : 'Editar Cliente'}</DialogTitle>
-          </DialogHeader>
+        <DialogContent className="h-screen w-screen max-w-none overflow-y-auto p-0 md:h-auto md:w-auto md:max-w-3xl md:p-6">
+          <div className="flex h-full flex-col">
+            <DialogHeader className="border-b px-4 py-4 md:border-0 md:px-0 md:py-0">
+              <DialogTitle className="text-left">
+                {isCreating ? 'Novo Cliente' : 'Editar Cliente'}
+              </DialogTitle>
+            </DialogHeader>
 
-          <Form {...methods}>
-            <form onSubmit={methods.handleSubmit(handleOnSubmit)} className="space-y-6">
-              <NameField control={methods.control} />
+            <div className="flex-1 overflow-y-auto px-4 py-4 md:px-0">
+              <Form {...methods}>
+                <form onSubmit={methods.handleSubmit(handleOnSubmit)} className="space-y-6">
+                  <NameField control={methods.control} />
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <DocsField control={methods.control} />
-                <DateBirth control={methods.control} />
-                <EmailField control={methods.control} />
-                <ContactField control={methods.control} />
-                <div className="col-span-1 space-y-2 md:col-span-2">
-                  <FormLabel>Endereço</FormLabel>
-                  <AddressesField control={methods.control} />
-                </div>
-              </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <DocsField control={methods.control} />
+                    <DateBirth control={methods.control} />
+                    <EmailField control={methods.control} />
+                    <ContactField control={methods.control} />
+                    <div className="col-span-1 space-y-2 md:col-span-2">
+                      <FormLabel>Endereço</FormLabel>
+                      <AddressesField control={methods.control} />
+                    </div>
+                  </div>
+                </form>
+              </Form>
+            </div>
 
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={closeModal}>
+            <DialogFooter className="bg-background border-t p-4 md:border-0 md:bg-transparent md:p-0">
+              <div className="flex w-full gap-3 md:w-auto">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={closeModal}
+                  className="flex-1 md:flex-none"
+                >
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={updateMutation.isPending}>
+                <Button
+                  type="submit"
+                  disabled={updateMutation.isPending}
+                  onClick={methods.handleSubmit(handleOnSubmit)}
+                  className="flex-1 md:flex-none"
+                >
                   {updateMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -226,37 +245,42 @@ const TableListClient = (): JSX.Element => {
                     'Salvar Alterações'
                   )}
                 </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+              </div>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* Modal de Confirmação de Exclusão */}
       <Dialog open={deleteConfirmOpen} onOpenChange={open => !open && closeDeleteDialog()}>
-        <DialogContent>
+        <DialogContent className="w-[90vw] max-w-md">
           <DialogHeader>
             <DialogTitle>Confirmar Exclusão</DialogTitle>
           </DialogHeader>
-          <p>Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.</p>
+          <p className="py-4">
+            Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.
+          </p>
           <DialogFooter>
-            <Button variant="outline" onClick={closeDeleteDialog}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleOnDelete}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Excluindo...
-                </>
-              ) : (
-                'Excluir'
-              )}
-            </Button>
+            <div className="flex w-full gap-3 md:w-auto">
+              <Button variant="outline" onClick={closeDeleteDialog} className="flex-1 md:flex-none">
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleOnDelete}
+                disabled={deleteMutation.isPending}
+                className="flex-1 md:flex-none"
+              >
+                {deleteMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Excluindo...
+                  </>
+                ) : (
+                  'Excluir'
+                )}
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -151,7 +151,9 @@ const EmailProviderSelector = ({
 
       <PopoverContent
         className={cn(
-          'mt-1.5 w-[302px] p-3 lg:w-[462px]',
+          'mt-1.5 p-3',
+          // Responsivo: ajustar largura baseado na tela
+          'w-[calc(100vw-2rem)] max-w-[462px] sm:w-[302px] lg:w-[462px]',
           // light styles
           'bg-white [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]',
           // dark styles
@@ -160,6 +162,9 @@ const EmailProviderSelector = ({
         align="start"
         side="bottom"
         onOpenAutoFocus={e => e.preventDefault()}
+        // Ajustar posição no mobile
+        sideOffset={4}
+        alignOffset={0}
       >
         <div
           ref={popoverRef}

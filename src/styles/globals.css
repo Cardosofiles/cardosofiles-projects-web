@@ -252,6 +252,7 @@ body {
 [data-theme='dark'] {
   color-scheme: dark;
 }
+
 @theme inline {
   --animate-scroll: scroll var(--animation-duration, 40s) var(--animation-direction, forwards)
     linear infinite;
@@ -260,5 +261,35 @@ body {
     to {
       transform: translate(calc(-50% - 0.5rem));
     }
+  }
+}
+
+/* Melhorias para mobile */
+@media (max-width: 768px) {
+  /* Garantir que inputs sejam acessíveis no mobile */
+  .form-input {
+    @apply text-base; /* Evita zoom no iOS */
+  }
+
+  /* Modal fullscreen no mobile */
+  [data-radix-dialog-content] {
+    @apply !fixed !inset-0 !h-screen !w-screen !max-w-none !translate-x-0 !translate-y-0 !rounded-none;
+  }
+
+  /* Ajustar spacing dos campos no mobile */
+  .form-field-mobile {
+    @apply mb-4;
+  }
+
+  /* Melhor espaçamento para botões no mobile */
+  .dialog-footer-mobile {
+    @apply bg-background/95 sticky right-0 bottom-0 left-0 border-t p-4 backdrop-blur-sm;
+  }
+}
+
+/* Garantir que popovers funcionem bem no mobile */
+@media (max-width: 640px) {
+  [data-radix-popover-content] {
+    @apply !w-[calc(100vw-2rem)] !max-w-none;
   }
 }
