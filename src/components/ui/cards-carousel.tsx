@@ -3,7 +3,15 @@
 import { ArrowLeft, ArrowRight, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
-import React, { createContext, useContext, useEffect, useRef, useState, type JSX } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type JSX,
+} from 'react'
 
 import { useOutsideClick } from '@/hooks/home-page/useOutsideClick'
 import { cn } from '@/lib/utils'
@@ -92,12 +100,7 @@ export const Carousel = ({ items, initialScroll = 0 }: CarouselProps) => {
             )}
           />
 
-          <div
-            className={cn(
-              'flex flex-row justify-start gap-4 pl-4',
-              'mx-auto max-w-7xl' // remove max-w-4xl if you want the carousel to span the full width of its container
-            )}
-          >
+          <div className={cn('flex flex-row justify-start gap-4 pl-4', 'mx-auto max-w-7xl')}>
             {items.map((item, index) => (
               <motion.div
                 initial={{
@@ -123,18 +126,18 @@ export const Carousel = ({ items, initialScroll = 0 }: CarouselProps) => {
         </div>
         <div className="mr-10 flex justify-end gap-2">
           <button
-            className="relative z-40 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 disabled:opacity-50"
+            className="bg-muted hover:bg-muted/80 relative z-40 flex h-10 w-10 items-center justify-center rounded-full transition-colors disabled:opacity-50"
             onClick={scrollLeft}
             disabled={!canScrollLeft}
           >
-            <ArrowLeft className="h-6 w-6 text-gray-500" />
+            <ArrowLeft className="text-muted-foreground h-6 w-6" />
           </button>
           <button
-            className="relative z-40 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 disabled:opacity-50"
+            className="bg-muted hover:bg-muted/80 relative z-40 flex h-10 w-10 items-center justify-center rounded-full transition-colors disabled:opacity-50"
             onClick={scrollRight}
             disabled={!canScrollRight}
           >
-            <ArrowRight className="h-6 w-6 text-gray-500" />
+            <ArrowRight className="text-muted-foreground h-6 w-6" />
           </button>
         </div>
       </div>
@@ -153,7 +156,12 @@ export const Card = ({
 }) => {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>
-  const { onCardClose, currentIndex } = useContext(CarouselContext)
+  const { onCardClose } = useContext(CarouselContext)
+
+  const handleClose = useCallback(() => {
+    setOpen(false)
+    onCardClose(index)
+  }, [onCardClose, index])
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -170,17 +178,12 @@ export const Card = ({
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [open])
+  }, [open, handleClose])
 
-  useOutsideClick(containerRef, () => handleClose())
+  useOutsideClick(containerRef, handleClose)
 
   const handleOpen = () => {
     setOpen(true)
-  }
-
-  const handleClose = () => {
-    setOpen(false)
-    onCardClose(index)
   }
 
   return (
@@ -200,23 +203,23 @@ export const Card = ({
               exit={{ opacity: 0 }}
               ref={containerRef}
               layoutId={layout ? `card-${card.title}` : undefined}
-              className="relative z-[60] mx-auto my-10 h-fit max-w-5xl rounded-3xl bg-white p-4 font-sans md:p-10 dark:bg-neutral-900"
+              className="bg-card border-border relative z-[60] mx-auto my-10 h-fit max-w-5xl rounded-3xl border p-4 font-sans md:p-10"
             >
               <button
-                className="sticky top-4 right-0 ml-auto flex h-8 w-8 items-center justify-center rounded-full bg-black dark:bg-white"
+                className="bg-foreground hover:bg-foreground/80 sticky top-4 right-0 ml-auto flex h-8 w-8 items-center justify-center rounded-full transition-colors"
                 onClick={handleClose}
               >
-                <X className="h-6 w-6 text-neutral-100 dark:text-neutral-900" />
+                <X className="text-background h-6 w-6" />
               </button>
               <motion.p
                 layoutId={layout ? `project-${card.title}` : undefined}
-                className="text-base font-medium text-black dark:text-white"
+                className="text-card-foreground text-base font-medium"
               >
                 {card.project}
               </motion.p>
               <motion.p
                 layoutId={layout ? `title-${card.title}` : undefined}
-                className="mt-4 text-2xl font-semibold text-neutral-700 md:text-5xl dark:text-white"
+                className="text-card-foreground mt-4 text-2xl font-semibold md:text-5xl"
               >
                 {card.title}
               </motion.p>
@@ -228,7 +231,7 @@ export const Card = ({
       <motion.button
         layoutId={layout ? `card-${card.title}` : undefined}
         onClick={handleOpen}
-        className="relative z-10 flex h-80 w-56 flex-col items-start justify-start overflow-hidden rounded-3xl bg-gray-100 md:h-[40rem] md:w-96 dark:bg-neutral-900"
+        className="bg-muted hover:bg-muted/80 relative z-10 flex h-80 w-56 flex-col items-start justify-start overflow-hidden rounded-3xl transition-colors md:h-[40rem] md:w-96"
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 z-30 h-full bg-gradient-to-b from-black/50 via-transparent to-transparent" />
         <div className="relative z-40 p-8">
@@ -251,19 +254,21 @@ export const Card = ({
   )
 }
 
+interface BlurImageProps {
+  src: string
+  className?: string
+  alt?: string
+  sizes?: string
+  priority?: boolean
+}
+
 export const BlurImage = ({
   src,
   className,
   alt,
-  fill = true, // deixa fill true por padrão
-  ...rest
-}: {
-  src: string
-  className?: string
-  alt?: string
-  fill?: boolean
-  [key: string]: any
-}) => {
+  sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
+  priority = false,
+}: BlurImageProps) => {
   const [isLoading, setLoading] = useState(true)
 
   return (
@@ -277,12 +282,12 @@ export const BlurImage = ({
         onLoad={() => setLoading(false)}
         src={src}
         alt={alt || 'Background image'}
-        fill // garante que ocupe todo o espaço
+        fill
+        sizes={sizes}
         quality={85}
-        priority={false}
+        priority={priority}
         placeholder="blur"
-        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD..."
-        {...rest}
+        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
       />
     </div>
   )
