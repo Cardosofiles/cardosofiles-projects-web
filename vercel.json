@@ -2,10 +2,7 @@
   "buildCommand": "npm run vercel-build",
   "framework": "nextjs",
   "functions": {
-    "app/**/*.ts": {
-      "maxDuration": 30
-    },
-    "src/**/*.ts": {
+    "app/**/*.{js,ts,tsx}": {
       "maxDuration": 30
     }
   },
