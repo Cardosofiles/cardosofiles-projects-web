@@ -2,9 +2,9 @@ import { HeaderDynamicForm } from '@/components/dynamic-form/layout/header'
 
 const DynamicFormLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="mt-5 min-h-screen px-10">
+    <div className="mt-10 min-h-screen px-10 lg:mt-20">
       <HeaderDynamicForm />
-      <main className="">{children}</main>
+      <main>{children}</main>
     </div>
   )
 }

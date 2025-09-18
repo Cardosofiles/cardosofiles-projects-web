@@ -22,7 +22,6 @@ import {
 } from '@/components/ui/table'
 import { TableSkeleton } from './table-skeleton'
 
-// Importações para o formulário
 import { AddressesField } from '@/components/dynamic-form/form/addresses-field'
 import { ContactField } from '@/components/dynamic-form/form/contact-field'
 import { DateBirth } from '@/components/dynamic-form/form/date-birth'
@@ -30,18 +29,15 @@ import { DocsField } from '@/components/dynamic-form/form/docs-field'
 import { EmailField } from '@/components/dynamic-form/form/email-field'
 import { NameField } from '@/components/dynamic-form/form/name-field'
 
-// Hooks customizados
 import { useClientForm } from '@/hooks/dynamic-form/useClientForm'
 import { useCreateUpdateClient, useDeleteClient } from '@/hooks/dynamic-form/useClientMutations'
 import { useClientList } from '@/hooks/dynamic-form/useClientQueries'
 import { useClientTable } from '@/hooks/dynamic-form/useClientTable'
 
-// Utils
 import type { ClienteFormData } from '@/schemas'
 import { formatCep, formatCpfCnpj, formatDate, formatPhone } from '@/utils/formatters'
 
 const TableListClient = (): JSX.Element => {
-  // Hooks customizados
   const { data, isLoading, isError } = useClientList()
   const deleteMutation = useDeleteClient()
   const updateMutation = useCreateUpdateClient()
@@ -59,7 +55,6 @@ const TableListClient = (): JSX.Element => {
     closeDeleteDialog,
   } = useClientTable()
 
-  // Handlers
   const handleOnEdit = async (id: string) => {
     const client = await handleEdit(id)
     if (client) {
@@ -91,7 +86,6 @@ const TableListClient = (): JSX.Element => {
     }
   }
 
-  // Loading e Error states
   if (isLoading) {
     return <TableSkeleton />
   }

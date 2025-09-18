@@ -1,17 +1,24 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
-import { Plus, Users } from 'lucide-react'
+import { Home, Plus, Users } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { JSX } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 
 const HeaderDynamicForm = (): JSX.Element => {
   const pathname = usePathname()
 
   const navItems = [
+    {
+      href: '/',
+      label: 'Home',
+      icon: Home,
+      description: 'Página inicial',
+    },
     {
       href: '/dynamic-form/create-client',
       label: 'Cadastro',
@@ -19,7 +26,7 @@ const HeaderDynamicForm = (): JSX.Element => {
       description: 'Novo cliente',
     },
     {
-      href: '/dynamic-form/list-client',
+      href: '/dynamic-form',
       label: 'Lista',
       icon: Users,
       description: 'Gerenciar clientes',
