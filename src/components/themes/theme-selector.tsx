@@ -72,8 +72,7 @@ const ThemeSelector = (): JSX.Element => {
       <Select value={activeTheme} onValueChange={setActiveTheme}>
         <SelectTrigger
           id="theme-selector"
-          size="sm"
-          className="bg-primary/20 dark:bg-primary/30 hover:bg-primary/90 dark:hover:bg-primary/80 justify-start hover:text-zinc-200 *:data-[slot=select-value]:w-12"
+          className="bg-primary/20 dark:bg-primary/30 hover:bg-primary/90 dark:hover:bg-primary/80 h-9 justify-start px-3 hover:text-zinc-200 *:data-[slot=select-value]:w-12"
         >
           <span className="text-muted-foreground hidden sm:block">Selecione o tema:</span>
           <span className="text-muted-foreground block sm:hidden">Tema:</span>
