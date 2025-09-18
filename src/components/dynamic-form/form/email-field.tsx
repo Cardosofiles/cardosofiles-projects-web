@@ -25,6 +25,7 @@ const EmailField = ({ control }: EmailFieldProps): JSX.Element => {
           <FormLabel>Email</FormLabel>
           <FormControl>
             <EmailProviderSelector
+              {...field}
               value={emailValue}
               onChange={value => setValue('email', value)}
               placeholder="exemplo@email.com"

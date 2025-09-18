@@ -247,7 +247,7 @@ const Home = (): JSX.Element => {
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-muted-foreground text-sm">
-              © 2024 Cardoso Files. Desenvolvido com ❤️ usando Next.js e Tailwind CSS.
+              © 2025 Cardoso Files. Desenvolvido com ❤️ usando Next.js e Tailwind CSS.
             </p>
             <div className="mt-4 flex justify-center space-x-6">
               <Link

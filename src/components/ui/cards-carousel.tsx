@@ -2,11 +2,11 @@
 
 import { ArrowLeft, ArrowRight, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+import Image from 'next/image'
 import React, { createContext, useContext, useEffect, useRef, useState, type JSX } from 'react'
 
 import { useOutsideClick } from '@/hooks/home-page/useOutsideClick'
 import { cn } from '@/lib/utils'
-import { ImageProps } from 'next/image'
 
 interface CarouselProps {
   items: JSX.Element[]
@@ -251,27 +251,39 @@ export const Card = ({
   )
 }
 
-export const BlurImage = ({ height, width, src, className, alt, ...rest }: ImageProps) => {
+export const BlurImage = ({
+  src,
+  className,
+  alt,
+  fill = true, // deixa fill true por padrão
+  ...rest
+}: {
+  src: string
+  className?: string
+  alt?: string
+  fill?: boolean
+  [key: string]: any
+}) => {
   const [isLoading, setLoading] = useState(true)
 
-  // Filtrar props que não devem ser passadas para o elemento DOM img
-  const { fill, blurDataURL, ...imgProps } = rest
-
   return (
-    <img
-      className={cn(
-        'h-full w-full transition duration-300',
-        isLoading ? 'blur-sm' : 'blur-0',
-        className
-      )}
-      onLoad={() => setLoading(false)}
-      src={src as string}
-      width={width}
-      height={height}
-      loading="lazy"
-      decoding="async"
-      alt={alt ? alt : 'Background of a beautiful view'}
-      {...imgProps}
-    />
+    <div className="relative h-full w-full">
+      <Image
+        className={cn(
+          'absolute inset-0 h-full w-full object-cover transition duration-300',
+          isLoading ? 'blur-sm' : 'blur-0',
+          className
+        )}
+        onLoad={() => setLoading(false)}
+        src={src}
+        alt={alt || 'Background image'}
+        fill // garante que ocupe todo o espaço
+        quality={85}
+        priority={false}
+        placeholder="blur"
+        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD..."
+        {...rest}
+      />
+    </div>
   )
 }
