@@ -10,7 +10,8 @@
     "db:deploy": "prisma migrate deploy",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build"
+    "db:push": "prisma db push",
+    "vercel-build": "prisma generate && prisma db push && next build"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

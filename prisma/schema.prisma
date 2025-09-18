@@ -14,19 +14,21 @@ datasource db {
 }
 
 model Client {
-  id        String    @id @default(uuid())
+  id        String    @id @default(cuid())
   name      String
   cpfCnpj   String    @unique
   birthDate DateTime
   email     String    @unique
-  phone     String
+  phone     String    @unique
   addresses Address[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  @@map("clients")
 }
 
 model Address {
-  id           String  @id @default(uuid())
+  id           String  @id @default(cuid())
   cep          String
   street       String
   neighborhood String
@@ -36,4 +38,6 @@ model Address {
   complement   String?
   clientId     String
   client       Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("addresses")
 }

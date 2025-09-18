@@ -4,6 +4,9 @@
   "functions": {
     "app/**/*.ts": {
       "maxDuration": 30
+    },
+    "src/**/*.ts": {
+      "maxDuration": 30
     }
   },
   "regions": [
