@@ -192,7 +192,7 @@ const TableListClient = (): JSX.Element => {
               <TableRow>
                 <TableCell colSpan={7} className="text-muted-foreground text-center">
                   {isSearchActive
-                    ? `Nenhum cliente encontrado para "${searchFilters?.searchTerm}"`
+                    ? `Nenhum cliente encontrado para &ldquo;${searchFilters?.searchTerm}&rdquo;`
                     : 'Nenhum cliente cadastrado'}
                 </TableCell>
               </TableRow>

@@ -122,7 +122,7 @@ const ClientSearch = ({ onSearch, onClear }: ClientSearchProps): JSX.Element => 
           <div className="text-muted-foreground mt-3 flex items-center gap-2 text-sm">
             <Search className="h-3 w-3" />
             <span>
-              Buscando por: <strong>"{searchTerm}"</strong>
+              Buscando por: <strong>&ldquo;{searchTerm}&rdquo;</strong>
               {searchType !== 'all' && (
                 <span className="ml-1">
                   em{' '}
