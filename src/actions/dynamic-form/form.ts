@@ -103,13 +103,17 @@ export const formActionClientCreate = async (data: ClienteFormData): Promise<Act
 // ✅ Ler todos os clientes
 export const formActionGetClient = async (): Promise<ActionResult> => {
   try {
+    console.log('🔍 Buscando clientes no banco de dados...')
+
     const clients = await db.client.findMany({
       include: { addresses: true },
       orderBy: { createdAt: 'desc' },
     })
 
+    console.log(`✅ ${clients.length} clientes encontrados`)
     return { success: true, data: clients }
   } catch (error) {
+    console.error('❌ Erro ao buscar clientes:', error)
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
     return { success: false, error: errorMessage }
   }

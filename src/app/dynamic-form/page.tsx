@@ -1,14 +1,15 @@
-import { TableListClient } from '@/components/dynamic-form/table'
-import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import type { JSX } from 'react'
 
+import { TableListClient } from '@/components/dynamic-form/table'
+import { Button } from '@/components/ui/button'
+
 const ListClientPage = (): JSX.Element => {
   return (
-    <div className="bg-background min-h-screen">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="border-border bg-card/50 border-b backdrop-blur-sm">
+      <div className="border-border border-b backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4">
             <Button asChild variant="outline" size="icon">

@@ -38,7 +38,7 @@ import type { ClienteFormData } from '@/schemas'
 import { formatCep, formatCpfCnpj, formatDate, formatPhone } from '@/utils/formatters'
 
 const TableListClient = (): JSX.Element => {
-  const { data, isLoading, isError } = useClientList()
+  const { data, isLoading, isError, error } = useClientList()
   const deleteMutation = useDeleteClient()
   const updateMutation = useCreateUpdateClient()
   const methods = useClientForm()
@@ -91,7 +91,16 @@ const TableListClient = (): JSX.Element => {
   }
 
   if (isError) {
-    return <p className="text-center text-red-500">Erro ao carregar clientes</p>
+    console.error('Erro no useClientList:', error)
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <p className="mb-4 text-center text-red-500">Erro ao carregar clientes</p>
+        <p className="text-muted-foreground mb-4 text-sm">
+          {error instanceof Error ? error.message : 'Erro desconhecido'}
+        </p>
+        <Button onClick={() => window.location.reload()}>Tentar Novamente</Button>
+      </div>
+    )
   }
 
   return (
