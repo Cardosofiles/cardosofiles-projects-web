@@ -7,7 +7,7 @@
 
 **Sistema completo de gerenciamento de clientes com formulários dinâmicos**
 
-[🔗 Acessar Projeto](/dynamic-form) • [🏠 Voltar ao Hub](../)
+[🔗 Acessar Projeto](https://cardosofiles-projects-web.vercel.app/) • [🏠 Voltar ao Hub](https://github.com/Cardosofiles/cardosofiles-projects-web)
 
 </div>
 
