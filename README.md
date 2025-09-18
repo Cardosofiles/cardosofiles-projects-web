@@ -9,7 +9,7 @@
 
 **Hub de projetos demonstrando habilidades Full Stack**
 
-[🌐 Demo Live](https://cardosofiles-projects.vercel.app) • [📧 Contato](mailto:cardosofiles@outlook.com) • [💼 LinkedIn](https://www.linkedin.com/in/Cardosofiles/)
+[🌐 Demo Live](https://cardosofiles-projects-web.vercel.app/) • [📧 Contato](mailto:cardosofiles@outlook.com) • [💼 LinkedIn](https://www.linkedin.com/in/Cardosofiles/)
 
 </div>
 
