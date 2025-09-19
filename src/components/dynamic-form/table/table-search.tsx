@@ -29,8 +29,18 @@ const ClientSearch = ({ onSearch, onClear }: ClientSearchProps): JSX.Element => 
   const [searchTerm, setSearchTerm] = useState('')
   const [searchType, setSearchType] = useState<SearchFilters['searchType']>('all')
 
+  // Verificar se deve desabilitar o input (quando selecionado "Todos os registros")
+  const isInputDisabled = searchType === 'all'
+
   const handleSearch = useCallback(() => {
-    if (searchTerm.trim()) {
+    if (searchType === 'all') {
+      // Se for "Todos os registros", exibir todos os clientes
+      onSearch({
+        searchTerm: '',
+        searchType: 'all',
+      })
+    } else if (searchTerm.trim()) {
+      // Para outros tipos, buscar apenas se houver termo
       onSearch({
         searchTerm: searchTerm.trim(),
         searchType,
@@ -45,8 +55,16 @@ const ClientSearch = ({ onSearch, onClear }: ClientSearchProps): JSX.Element => 
   }, [onClear])
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !isInputDisabled) {
       handleSearch()
+    }
+  }
+
+  const handleSearchTypeChange = (value: SearchFilters['searchType']) => {
+    setSearchType(value)
+    // Se mudou para "Todos os registros", limpar o campo de busca
+    if (value === 'all') {
+      setSearchTerm('')
     }
   }
 
@@ -64,11 +82,16 @@ const ClientSearch = ({ onSearch, onClear }: ClientSearchProps): JSX.Element => 
               <Input
                 id="search-input"
                 type="text"
-                placeholder="Digite o nome, CPF/CNPJ ou email..."
+                placeholder={
+                  isInputDisabled
+                    ? 'Selecione um filtro específico para buscar...'
+                    : 'Digite o nome, CPF/CNPJ ou email...'
+                }
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 onKeyPress={handleKeyPress}
                 className="pl-10"
+                disabled={isInputDisabled}
               />
             </div>
           </div>
@@ -78,15 +101,13 @@ const ClientSearch = ({ onSearch, onClear }: ClientSearchProps): JSX.Element => 
             <Label htmlFor="search-type" className="text-sm font-medium">
               Buscar por
             </Label>
-            <Select
-              value={searchType}
-              onValueChange={(value: SearchFilters['searchType']) => setSearchType(value)}
-            >
+            <Select value={searchType} onValueChange={handleSearchTypeChange}>
               <SelectTrigger className="mt-1">
                 <SelectValue placeholder="Selecione o tipo" />
               </SelectTrigger>
+
               <SelectContent>
-                <SelectItem value="all">Todos os campos</SelectItem>
+                <SelectItem value="all">Todos os registros</SelectItem>
                 <SelectItem value="name">Nome</SelectItem>
                 <SelectItem value="cpfCnpj">CPF/CNPJ</SelectItem>
                 <SelectItem value="email">Email</SelectItem>
@@ -98,17 +119,17 @@ const ClientSearch = ({ onSearch, onClear }: ClientSearchProps): JSX.Element => 
           <div className="flex gap-2">
             <Button
               onClick={handleSearch}
-              disabled={!searchTerm.trim()}
+              disabled={!isInputDisabled && !searchTerm.trim()}
               className="flex-1 md:flex-none"
             >
               <Search className="mr-2 h-4 w-4" />
-              Buscar
+              {isInputDisabled ? 'Exibir Todos' : 'Buscar'}
             </Button>
 
             <Button
               variant="outline"
               onClick={handleClear}
-              disabled={!searchTerm}
+              disabled={!searchTerm && searchType === 'all'}
               className="flex-1 md:flex-none"
             >
               <X className="mr-2 h-4 w-4" />
@@ -118,18 +139,24 @@ const ClientSearch = ({ onSearch, onClear }: ClientSearchProps): JSX.Element => 
         </div>
 
         {/* Indicador de busca ativa */}
-        {searchTerm && (
+        {searchTerm && !isInputDisabled && (
           <div className="text-muted-foreground mt-3 flex items-center gap-2 text-sm">
             <Search className="h-3 w-3" />
             <span>
               Buscando por: <strong>&ldquo;{searchTerm}&rdquo;</strong>
-              {searchType !== 'all' && (
-                <span className="ml-1">
-                  em{' '}
-                  {searchType === 'name' ? 'nome' : searchType === 'cpfCnpj' ? 'CPF/CNPJ' : 'email'}
-                </span>
-              )}
+              <span className="ml-1">
+                em{' '}
+                {searchType === 'name' ? 'nome' : searchType === 'cpfCnpj' ? 'CPF/CNPJ' : 'email'}
+              </span>
             </span>
+          </div>
+        )}
+
+        {/* Indicador quando exibindo todos */}
+        {searchType === 'all' && (
+          <div className="text-muted-foreground mt-3 flex items-center gap-2 text-sm">
+            <Search className="h-3 w-3" />
+            <span>Exibindo todos os registros cadastrados</span>
           </div>
         )}
       </CardContent>

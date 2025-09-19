@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 import { Header } from '@/components/layout/header'
 import { NextThemeProvider } from '@/providers/next-theme'
 import TanstackQueryProvider from '@/providers/tanstack-query'
+import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://cardosofiles-projects-web.vercel.app'),
@@ -125,6 +126,7 @@ export default async function RootLayout({
               <Header />
               <div className="h-16" /> {/* Spacer for fixed header */}
               <main className="mt-2">{children}</main>
+              <Toaster position="top-right" richColors closeButton duration={4000} />
             </ActiveThemeProvider>
           </NextThemeProvider>
         </TanstackQueryProvider>

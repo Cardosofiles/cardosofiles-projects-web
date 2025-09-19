@@ -6,7 +6,8 @@ export const useClientSearch = (clients: Client[] = []) => {
   const [searchFilters, setSearchFilters] = useState<SearchFilters | null>(null)
 
   const filteredClients = useMemo(() => {
-    if (!searchFilters || !searchFilters.searchTerm) {
+    // Se não há filtros ou é "Todos os registros", retorna todos
+    if (!searchFilters || searchFilters.searchType === 'all' || !searchFilters.searchTerm) {
       return clients
     }
 
@@ -29,17 +30,8 @@ export const useClientSearch = (clients: Client[] = []) => {
         case 'email':
           return client.email.toLowerCase().includes(term)
 
-        case 'all':
         default:
-          const cleanCpfCnpj2 = client.cpfCnpj.replace(/\D/g, '')
-          const cleanSearchTerm2 = term.replace(/\D/g, '')
-
-          return (
-            client.name.toLowerCase().includes(term) ||
-            client.email.toLowerCase().includes(term) ||
-            cleanCpfCnpj2.includes(cleanSearchTerm2) ||
-            client.cpfCnpj.toLowerCase().includes(term)
-          )
+          return true
       }
     })
   }, [clients, searchFilters])
@@ -52,7 +44,8 @@ export const useClientSearch = (clients: Client[] = []) => {
     setSearchFilters(null)
   }
 
-  const isSearchActive = !!searchFilters?.searchTerm
+  // Considera busca ativa apenas quando há termo de busca E não é "all"
+  const isSearchActive = !!(searchFilters?.searchTerm && searchFilters.searchType !== 'all')
 
   return {
     filteredClients,

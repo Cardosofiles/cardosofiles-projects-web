@@ -10,23 +10,20 @@ import { ContactField } from '@/components/dynamic-form/form/contact-field'
 import { DateBirth } from '@/components/dynamic-form/form/date-birth'
 import { DocsField } from '@/components/dynamic-form/form/docs-field'
 import { EmailField } from '@/components/dynamic-form/form/email-field'
-import { Messages } from '@/components/dynamic-form/form/message'
 import { NameField } from '@/components/dynamic-form/form/name-field'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
 
-import { formActionClientCreate } from '@/actions/dynamic-form/form'
-
 import { clienteSchema, type ClienteFormData } from '@/schemas'
 
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
 
 const FormCreateCliente = (): JSX.Element => {
-  const [error, setError] = useState<string>()
-  const [success, setSuccess] = useState<string>()
-
   const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string>('')
+  const [success, setSuccess] = useState<string>('')
 
   const methods = useForm<ClienteFormData>({
     resolver: zodResolver(clienteSchema),
@@ -42,24 +39,20 @@ const FormCreateCliente = (): JSX.Element => {
     },
   })
 
-  const { handleSubmit, reset } = methods
+  const { handleSubmit, reset, setError: setFormError } = methods
 
   const handleSave = (data: ClienteFormData) => {
-    setError('')
-    setSuccess('')
-
     startTransition(() => {
-      formActionClientCreate(data).then(values => {
-        if (values) {
-          setError(values.error ?? undefined)
-          if (!values.error) {
-            setSuccess('Cliente salvo com sucesso!')
-            reset()
-          }
-        }
-      })
+      // Implementar lógica de criação aqui
+      console.log('Criando cliente:', data)
+      // Para uso futuro quando conectar com as actions
     })
   }
+
+  const phone = '5534996741823'
+  const whatsappMessage = 'Olá, preciso de ajuda para me cadastrar no FormDynamic.'
+  const whatsappLink = `https://wa.me/${phone}?text=${encodeURIComponent(whatsappMessage)}`
+  const supportEmail = 'support@formdynamic.com'
 
   return (
     <>
@@ -117,7 +110,55 @@ const FormCreateCliente = (): JSX.Element => {
             </CardContent>
           </Card>
 
-          <Messages error={error} success={success} />
+          {/* <Messages error={error} success={success} /> */}
+
+          {/* Exibição adicional de erros de validação */}
+          {Object.keys(methods.formState.errors).length > 0 && (
+            <div className="bg-destructive/10 text-destructive flex flex-col gap-2 rounded-md p-3 text-sm font-semibold">
+              <div className="flex">
+                <div className="ml-3">
+                  <h3 className="text-destructive">Corrija os seguintes erros:</h3>
+                  <div className="mt-2 text-sm text-red-700 dark:text-red-300">
+                    <ul className="list-disc space-y-1 pl-5">
+                      {Object.entries(methods.formState.errors).map(([field, error]) => (
+                        <li key={field}>
+                          <strong>
+                            {field === 'name' && 'Nome'}
+                            {field === 'cpfCnpj' && 'CPF/CNPJ'}
+                            {field === 'email' && 'Email'}
+                            {field === 'phone' && 'Telefone'}
+                            {field === 'birthDate' && 'Data de Nascimento'}
+                            {field === 'addresses' && 'Endereços'}
+                          </strong>
+                          : {error?.message}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="text-destructive/80 mt-2 text-xs font-normal">
+                    <span>Precisa de ajuda? </span>
+                    <Link
+                      href={`mailto:${supportEmail}`}
+                      className="hover:text-destructive underline"
+                    >
+                      Contate o suporte via email
+                    </Link>
+                    <span> ou </span>
+                    <Link
+                      href={whatsappLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-destructive underline"
+                    >
+                      fale conosco no WhatsApp
+                    </Link>
+                    <span> para mais informações.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col gap-2 md:flex-row md:justify-end lg:flex-row lg:justify-end">
             <Button
@@ -125,7 +166,11 @@ const FormCreateCliente = (): JSX.Element => {
               variant="outline"
               type="button"
               className="hover:bg-primary/10 mt-6 w-full cursor-pointer md:max-w-28 lg:max-w-48"
-              onClick={() => reset()}
+              onClick={() => {
+                reset()
+                setError('')
+                setSuccess('')
+              }}
             >
               <X className="mr-2 h-4 w-4" />
               Cancelar

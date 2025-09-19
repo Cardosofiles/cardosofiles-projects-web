@@ -22,8 +22,8 @@ export type Client = {
   updatedAt?: Date
 }
 
-export type ActionResult = {
+export type ActionResult<T = unknown> = {
   success: boolean
-  data?: any
+  data?: T
   error?: string
 }

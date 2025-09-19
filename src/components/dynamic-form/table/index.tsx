@@ -38,6 +38,12 @@ import { useClientTable } from '@/hooks/dynamic-form/useClientTable'
 
 import type { ClienteFormData } from '@/schemas'
 import { formatCep, formatCpfCnpj, formatDate, formatPhone } from '@/utils/formatters'
+import Link from 'next/link'
+import { toast } from 'sonner'
+
+interface ErrorWithMessage {
+  message?: string
+}
 
 const TableListClient = (): JSX.Element => {
   const { data, isLoading, isError, error } = useClientList()
@@ -79,6 +85,37 @@ const TableListClient = (): JSX.Element => {
         onSuccess: () => {
           closeModal()
           methods.reset()
+          toast.success(
+            isCreating ? 'Cliente criado com sucesso!' : 'Cliente atualizado com sucesso!'
+          )
+        },
+        onError: (error: ErrorWithMessage) => {
+          console.error('Erro na operação:', error)
+
+          // Tratamento específico para erros de validação de unicidade
+          const errorMessage = error?.message || 'Erro desconhecido'
+
+          if (errorMessage.includes('Email já está em uso')) {
+            methods.setError('email', {
+              type: 'manual',
+              message: 'Este email já está sendo usado por outro cliente',
+            })
+            toast.error('Email já está em uso por outro cliente')
+          } else if (errorMessage.includes('CPF/CNPJ já está em uso')) {
+            methods.setError('cpfCnpj', {
+              type: 'manual',
+              message: 'Este CPF/CNPJ já está sendo usado por outro cliente',
+            })
+            toast.error('CPF/CNPJ já está em uso por outro cliente')
+          } else if (errorMessage.includes('Telefone já está em uso')) {
+            methods.setError('phone', {
+              type: 'manual',
+              message: 'Este telefone já está sendo usado por outro cliente',
+            })
+            toast.error('Telefone já está em uso por outro cliente')
+          } else {
+            toast.error(`Erro ao ${isCreating ? 'criar' : 'atualizar'} cliente: ${errorMessage}`)
+          }
         },
       }
     )
@@ -108,6 +145,11 @@ const TableListClient = (): JSX.Element => {
       </div>
     )
   }
+
+  const phone = '5534996741823'
+  const whatsappMessage = 'Olá, preciso de ajuda para me cadastrar no FormDynamic.'
+  const whatsappLink = `https://wa.me/${phone}?text=${encodeURIComponent(whatsappMessage)}`
+  const supportEmail = 'support@formdynamic.com'
 
   return (
     <div className="space-y-4 py-5 lg:px-5">
@@ -192,7 +234,7 @@ const TableListClient = (): JSX.Element => {
               <TableRow>
                 <TableCell colSpan={7} className="text-muted-foreground text-center">
                   {isSearchActive
-                    ? `Nenhum cliente encontrado para &ldquo;${searchFilters?.searchTerm}&rdquo;`
+                    ? `Nenhum cliente encontrado para &ldquo;${searchFilters?.searchTerm}&rdquo`
                     : 'Nenhum cliente cadastrado'}
                 </TableCell>
               </TableRow>
@@ -237,6 +279,54 @@ const TableListClient = (): JSX.Element => {
                       <AddressesField control={methods.control} />
                     </div>
                   </div>
+
+                  {/* Exibição de erros de validação */}
+                  {Object.keys(methods.formState.errors).length > 0 && (
+                    <div className="bg-destructive/10 text-destructive flex flex-col gap-2 rounded-md p-3 text-sm font-semibold">
+                      <div className="flex">
+                        <div className="ml-3">
+                          <h3 className="text-destructive">Corrija os seguintes erros:</h3>
+                          <div className="mt-2 text-sm text-red-700 dark:text-red-300">
+                            <ul className="list-disc space-y-1 pl-5">
+                              {Object.entries(methods.formState.errors).map(([field, error]) => (
+                                <li key={field}>
+                                  <strong>
+                                    {field === 'name' && 'Nome'}
+                                    {field === 'cpfCnpj' && 'CPF/CNPJ'}
+                                    {field === 'email' && 'Email'}
+                                    {field === 'phone' && 'Telefone'}
+                                    {field === 'birthDate' && 'Data de Nascimento'}
+                                    {field === 'addresses' && 'Endereços'}
+                                  </strong>
+                                  : {error?.message}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          <div className="text-destructive/80 mt-2 text-xs font-normal">
+                            <span>Precisa de ajuda? </span>
+                            <Link
+                              href={`mailto:${supportEmail}`}
+                              className="hover:text-destructive underline"
+                            >
+                              Contate o suporte via email
+                            </Link>
+                            <span> ou </span>
+                            <Link
+                              href={whatsappLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:text-destructive underline"
+                            >
+                              fale conosco no WhatsApp
+                            </Link>
+                            <span> para mais informações.</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </form>
               </Form>
             </div>
@@ -246,7 +336,10 @@ const TableListClient = (): JSX.Element => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={closeModal}
+                  onClick={() => {
+                    closeModal()
+                    methods.clearErrors() // Limpar erros ao cancelar
+                  }}
                   className="flex-1 md:flex-none"
                 >
                   <X className="h-4 w-4" />
