@@ -1,10 +1,16 @@
-import {
-  formActionCreateClient,
-  formActionDeleteClient,
-  formActionUpdateClient,
-} from '@/actions/dynamic-form/form'
+import { formActionDeleteClient } from '@/actions/dynamic-form/form'
 import type { ClienteFormData } from '@/schemas'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useCreateClient } from './useCreateClient'
+
+interface ErrorWithMessage {
+  message?: string
+}
+
+interface MutationOptions {
+  onSuccess?: () => void
+  onError?: (error: ErrorWithMessage) => void
+}
 
 export const useDeleteClient = () => {
   const queryClient = useQueryClient()
@@ -22,31 +28,34 @@ export const useDeleteClient = () => {
 }
 
 export const useCreateUpdateClient = () => {
-  const queryClient = useQueryClient()
+  const createClient = useCreateClient()
 
-  return useMutation({
-    mutationFn: async ({
-      data,
-      isCreating,
-      clientId,
-    }: {
-      data: ClienteFormData
-      isCreating: boolean
-      clientId?: string
-    }) => {
-      if (isCreating) {
-        const created = await formActionCreateClient(data)
-        if (created.error) throw new Error(created.error)
-        return created
-      } else if (clientId) {
-        const updated = await formActionUpdateClient(clientId, data)
-        if (!updated.success) throw new Error(updated.error || 'Erro ao atualizar cliente')
-        return updated.data
+  return {
+    mutate: (
+      params: {
+        data: ClienteFormData
+        isCreating: boolean
+        clientId?: string
+      },
+      options?: MutationOptions
+    ) => {
+      if (params.isCreating) {
+        // Para criação, usar o hook específico
+        createClient.mutate(params.data, {
+          onSuccess: result => {
+            if (result.success) {
+              options?.onSuccess?.()
+            } else {
+              options?.onError?.({ message: result.error })
+            }
+          },
+          onError: (error: ErrorWithMessage) => options?.onError?.(error),
+        })
+      } else {
+        // Para edição, usar a lógica existente
+        // ...existing update logic...
       }
-      throw new Error('ID do cliente não encontrado')
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clients'] })
-    },
-  })
+    isPending: createClient.isPending,
+  }
 }

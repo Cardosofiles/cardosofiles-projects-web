@@ -2,8 +2,9 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Mail, MapPin, Save, User2, X } from 'lucide-react'
-import { useState, useTransition, type JSX } from 'react'
+import { type JSX } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 
 import { AddressesField } from '@/components/dynamic-form/form/addresses-field'
 import { ContactField } from '@/components/dynamic-form/form/contact-field'
@@ -14,16 +15,16 @@ import { NameField } from '@/components/dynamic-form/form/name-field'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
+import { ErrorDisplay } from '@/components/ux/error-display'
 
+import { useCreateClient } from '@/hooks/dynamic-form/useCreateClient'
 import { clienteSchema, type ClienteFormData } from '@/schemas'
 
 import { cn } from '@/lib/utils'
-import Link from 'next/link'
 
 const FormCreateCliente = (): JSX.Element => {
-  const [isPending, startTransition] = useTransition()
-  const [error, setError] = useState<string>('')
-  const [success, setSuccess] = useState<string>('')
+  // Remover estados não utilizados
+  const createClientMutation = useCreateClient()
 
   const methods = useForm<ClienteFormData>({
     resolver: zodResolver(clienteSchema),
@@ -42,10 +43,37 @@ const FormCreateCliente = (): JSX.Element => {
   const { handleSubmit, reset, setError: setFormError } = methods
 
   const handleSave = (data: ClienteFormData) => {
-    startTransition(() => {
-      // Implementar lógica de criação aqui
-      console.log('Criando cliente:', data)
-      // Para uso futuro quando conectar com as actions
+    createClientMutation.mutate(data, {
+      onSuccess: result => {
+        if (result.success) {
+          reset()
+          toast.success('Cliente criado com sucesso!')
+        } else {
+          // Tratamento específico para erros de validação de unicidade
+          if (result.error?.includes('Email já está em uso')) {
+            setFormError('email', {
+              type: 'manual',
+              message: 'Este email já está sendo usado por outro cliente',
+            })
+          } else if (result.error?.includes('CPF/CNPJ já está em uso')) {
+            setFormError('cpfCnpj', {
+              type: 'manual',
+              message: 'Este CPF/CNPJ já está sendo usado por outro cliente',
+            })
+          } else if (result.error?.includes('Telefone já está em uso')) {
+            setFormError('phone', {
+              type: 'manual',
+              message: 'Este telefone já está sendo usado por outro cliente',
+            })
+          }
+
+          toast.error(result.error || 'Erro ao criar cliente')
+        }
+      },
+      onError: error => {
+        console.error('Erro inesperado:', error)
+        toast.error('Erro inesperado ao salvar cliente')
+      },
     })
   }
 
@@ -110,66 +138,21 @@ const FormCreateCliente = (): JSX.Element => {
             </CardContent>
           </Card>
 
-          {/* <Messages error={error} success={success} /> */}
-
-          {/* Exibição adicional de erros de validação */}
-          {Object.keys(methods.formState.errors).length > 0 && (
-            <div className="bg-destructive/10 text-destructive flex flex-col gap-2 rounded-md p-3 text-sm font-semibold">
-              <div className="flex">
-                <div className="ml-3">
-                  <h3 className="text-destructive">Corrija os seguintes erros:</h3>
-                  <div className="mt-2 text-sm text-red-700 dark:text-red-300">
-                    <ul className="list-disc space-y-1 pl-5">
-                      {Object.entries(methods.formState.errors).map(([field, error]) => (
-                        <li key={field}>
-                          <strong>
-                            {field === 'name' && 'Nome'}
-                            {field === 'cpfCnpj' && 'CPF/CNPJ'}
-                            {field === 'email' && 'Email'}
-                            {field === 'phone' && 'Telefone'}
-                            {field === 'birthDate' && 'Data de Nascimento'}
-                            {field === 'addresses' && 'Endereços'}
-                          </strong>
-                          : {error?.message}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="text-destructive/80 mt-2 text-xs font-normal">
-                    <span>Precisa de ajuda? </span>
-                    <Link
-                      href={`mailto:${supportEmail}`}
-                      className="hover:text-destructive underline"
-                    >
-                      Contate o suporte via email
-                    </Link>
-                    <span> ou </span>
-                    <Link
-                      href={whatsappLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-destructive underline"
-                    >
-                      fale conosco no WhatsApp
-                    </Link>
-                    <span> para mais informações.</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Exibição melhorada de erros de validação */}
+          <ErrorDisplay
+            errors={methods.formState.errors}
+            supportEmail={supportEmail}
+            whatsappLink={whatsappLink}
+          />
 
           <div className="flex flex-col gap-2 md:flex-row md:justify-end lg:flex-row lg:justify-end">
             <Button
-              disabled={isPending}
+              disabled={createClientMutation.isPending}
               variant="outline"
               type="button"
               className="hover:bg-primary/10 mt-6 w-full cursor-pointer md:max-w-28 lg:max-w-48"
               onClick={() => {
                 reset()
-                setError('')
-                setSuccess('')
               }}
             >
               <X className="mr-2 h-4 w-4" />
@@ -177,11 +160,11 @@ const FormCreateCliente = (): JSX.Element => {
             </Button>
 
             <Button
-              disabled={isPending}
+              disabled={createClientMutation.isPending}
               type="submit"
               className="mt-6 w-full cursor-pointer md:max-w-40 lg:max-w-64"
             >
-              {isPending ? (
+              {createClientMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Salvando...
