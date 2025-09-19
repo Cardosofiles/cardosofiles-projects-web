@@ -21,3 +21,9 @@ export type Client = {
   createdAt?: Date
   updatedAt?: Date
 }
+
+export type ActionResult = {
+  success: boolean
+  data?: any
+  error?: string
+}

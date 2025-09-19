@@ -1,5 +1,5 @@
 import {
-  formActionClientCreate,
+  formActionCreateClient,
   formActionDeleteClient,
   formActionUpdateClient,
 } from '@/actions/dynamic-form/form'
@@ -35,7 +35,7 @@ export const useCreateUpdateClient = () => {
       clientId?: string
     }) => {
       if (isCreating) {
-        const created = await formActionClientCreate(data)
+        const created = await formActionCreateClient(data)
         if (created.error) throw new Error(created.error)
         return created
       } else if (clientId) {

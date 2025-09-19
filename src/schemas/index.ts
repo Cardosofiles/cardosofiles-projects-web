@@ -34,12 +34,30 @@ const dateValidation = z.string().refine(
   }
 )
 
+// Validação melhorada para telefone
+const phoneValidation = z.string().refine(
+  phone => {
+    if (!phone) return false
+
+    // Remove todos os caracteres não numéricos
+    const numbersOnly = phone.replace(/\D/g, '')
+
+    // Aceita telefones com 10 ou 11 dígitos (com ou sem DDD)
+    // 10 dígitos: (11) 1234-5678 ou 1133334444
+    // 11 dígitos: (11) 91234-5678 ou 11912345678
+    return numbersOnly.length === 10 || numbersOnly.length === 11
+  },
+  {
+    message: 'Telefone deve ter 10 ou 11 dígitos',
+  }
+)
+
 export const clienteSchema = z.object({
   name: z.string().min(3, 'Nome obrigatório'),
   cpfCnpj: z.string().min(11, 'CPF/CNPJ inválido'),
   birthDate: dateValidation, // Usar validação customizada
   email: z.string().email('Email inválido'),
-  phone: z.string().min(14, 'Telefone inválido'),
+  phone: phoneValidation, // Usar validação melhorada
   addresses: z.array(addressSchema).min(1, 'Informe ao menos um endereço'),
 })
 

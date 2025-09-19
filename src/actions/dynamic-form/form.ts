@@ -1,103 +1,23 @@
 'use server'
 
 import { db } from '@/lib/prisma-bd'
-import { type ClienteFormData, clienteSchema } from '@/schemas'
-import { getClientByCpfCnpj, getClientByEmail, getClientByNumber } from '@/services/client'
-import { parseDateToDateObj } from '@/utils/formatters'
+import type { ClienteFormData } from '@/schemas'
+import type { ActionResult } from '@/types'
+import { normalizePhone } from '@/utils/formatters'
 
-// Tipos para os retornos das actions
-interface ActionResult<T = unknown> {
-  success: boolean
-  data?: T
-  error?: string
+// Helper para converter data DD/MM/YYYY para Date sem problemas de timezone
+const parseBirthDate = (dateString: string): Date => {
+  const [day, month, year] = dateString.split('/').map(Number)
+  // Criar data no timezone local (meio-dia para evitar problemas de DST)
+  return new Date(year, month - 1, day, 12, 0, 0, 0)
 }
 
-interface PrismaError extends Error {
-  code?: string
-  meta?: {
-    target?: string[]
-  }
-}
-
-// Converte "DD/MM/YYYY" ou "YYYY-MM-DD" para Date
-
-// ✅ Criar cliente
-export const formActionClientCreate = async (data: ClienteFormData): Promise<ActionResult> => {
-  try {
-    const validatedFields = clienteSchema.safeParse(data)
-
-    if (!validatedFields.success) {
-      console.log(validatedFields.error)
-      return { success: false, error: 'Dados inválidos.' }
-    }
-
-    const { name, cpfCnpj, birthDate, email, phone, addresses } = validatedFields.data
-
-    // Normaliza o email e o cpfCnpj para evitar problemas de case/espacos
-    const normalizedEmail = email.trim().toLowerCase()
-    const normalizedCpfCnpj = cpfCnpj.replace(/\D/g, '')
-
-    // Verifica se já existe cliente com o mesmo email
-    const existingClient = await getClientByEmail({ email: normalizedEmail })
-    if (existingClient) {
-      return {
-        success: false,
-        error: 'Já existe uma conta com este email.',
-      }
-    }
-
-    // Verifica se já existe cliente com o mesmo CPF/CNPJ
-    const existingCpfCnpj = await getClientByCpfCnpj({ cpfCnpj: normalizedCpfCnpj })
-    if (existingCpfCnpj) {
-      return {
-        success: false,
-        error: 'Já existe uma conta com este CPF/CNPJ.',
-      }
-    }
-
-    const existingPhone = await getClientByNumber({ phone: phone })
-    if (existingPhone) {
-      return {
-        success: false,
-        error: 'Já existe uma conta com este telefone.',
-      }
-    }
-
-    // Converter data corretamente para evitar problemas de timezone
-    const parsedBirthDate = parseDateToDateObj(birthDate)
-    if (!parsedBirthDate) {
-      return { success: false, error: 'Data de nascimento inválida.' }
-    }
-
-    await db.client.create({
-      data: {
-        email: normalizedEmail,
-        name,
-        cpfCnpj: normalizedCpfCnpj,
-        birthDate: parsedBirthDate, // Usar a data corretamente parseada
-        phone,
-        addresses: { create: addresses },
-      },
-    })
-
-    return { success: true }
-  } catch (error) {
-    const prismaError = error as PrismaError
-
-    // Trata erro de constraint única do Prisma
-    if (prismaError.code === 'P2002') {
-      if (prismaError.meta?.target?.includes('cpfCnpj')) {
-        return { success: false, error: 'Já existe uma conta com este CPF/CNPJ.' }
-      }
-      if (prismaError.meta?.target?.includes('email')) {
-        return { success: false, error: 'Já existe uma conta com este email.' }
-      }
-      return { success: false, error: 'Já existe um registro com dados duplicados.' }
-    }
-
-    console.log(error)
-    return { success: false, error: 'Erro ao criar cliente.' }
-  }
+// Helper para converter Date para DD/MM/YYYY
+const formatBirthDateForForm = (date: Date): string => {
+  const day = date.getDate().toString().padStart(2, '0')
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const year = date.getFullYear().toString()
+  return `${day}/${month}/${year}`
 }
 
 // ✅ Ler todos os clientes
@@ -119,9 +39,154 @@ export const formActionGetClient = async (): Promise<ActionResult> => {
   }
 }
 
-// ✅ Ler cliente por ID
+// ✅ Criar cliente
+export const formActionCreateClient = async (data: ClienteFormData): Promise<ActionResult> => {
+  try {
+    console.log('📝 Criando cliente:', data.name)
+
+    // Normalizar telefone para armazenamento
+    const normalizedPhone = normalizePhone(data.phone)
+
+    // Verificar se já existe cliente com mesmo email
+    const existingEmail = await db.client.findUnique({
+      where: { email: data.email },
+    })
+
+    if (existingEmail) {
+      return { success: false, error: 'Email já está em uso' }
+    }
+
+    // Verificar se já existe cliente com mesmo CPF/CNPJ
+    const existingCpfCnpj = await db.client.findUnique({
+      where: { cpfCnpj: data.cpfCnpj },
+    })
+
+    if (existingCpfCnpj) {
+      return { success: false, error: 'CPF/CNPJ já está em uso' }
+    }
+
+    // Verificar se já existe cliente com mesmo telefone
+    const existingPhone = await db.client.findUnique({
+      where: { phone: normalizedPhone },
+    })
+
+    if (existingPhone) {
+      return { success: false, error: 'Telefone já está em uso' }
+    }
+
+    // Converter data de nascimento corretamente
+    const birthDate = parseBirthDate(data.birthDate)
+
+    const client = await db.client.create({
+      data: {
+        name: data.name,
+        cpfCnpj: data.cpfCnpj,
+        birthDate,
+        email: data.email,
+        phone: normalizedPhone,
+        addresses: {
+          create: data.addresses,
+        },
+      },
+      include: { addresses: true },
+    })
+
+    console.log('✅ Cliente criado com sucesso:', client.id)
+    return { success: true, data: client }
+  } catch (error) {
+    console.error('❌ Erro ao criar cliente:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+    return { success: false, error: errorMessage }
+  }
+}
+
+// ✅ Atualizar cliente
+export const formActionUpdateClient = async (
+  id: string,
+  data: ClienteFormData
+): Promise<ActionResult> => {
+  try {
+    console.log('📝 Atualizando cliente:', id)
+
+    // Verificar se o cliente existe
+    const existingClient = await db.client.findUnique({
+      where: { id },
+      include: { addresses: true },
+    })
+
+    if (!existingClient) {
+      return { success: false, error: 'Cliente não encontrado' }
+    }
+
+    // Normalizar telefone para verificação
+    const normalizedPhone = normalizePhone(data.phone)
+
+    // Verificar duplicatas (excluindo o cliente atual)
+    const [emailCheck, cpfCnpjCheck, phoneCheck] = await Promise.all([
+      db.client.findFirst({
+        where: { email: data.email, NOT: { id } },
+      }),
+      db.client.findFirst({
+        where: { cpfCnpj: data.cpfCnpj, NOT: { id } },
+      }),
+      db.client.findFirst({
+        where: { phone: normalizedPhone, NOT: { id } },
+      }),
+    ])
+
+    if (emailCheck) {
+      return { success: false, error: 'Email já está em uso por outro cliente' }
+    }
+
+    if (cpfCnpjCheck) {
+      return { success: false, error: 'CPF/CNPJ já está em uso por outro cliente' }
+    }
+
+    if (phoneCheck) {
+      return { success: false, error: 'Telefone já está em uso por outro cliente' }
+    }
+
+    // Converter data de nascimento corretamente
+    const birthDate = parseBirthDate(data.birthDate)
+
+    // Atualizar cliente usando transação
+    const client = await db.$transaction(async tx => {
+      // Deletar endereços existentes
+      await tx.address.deleteMany({
+        where: { clientId: id },
+      })
+
+      // Atualizar cliente com novos dados
+      return await tx.client.update({
+        where: { id },
+        data: {
+          name: data.name,
+          cpfCnpj: data.cpfCnpj,
+          birthDate,
+          email: data.email,
+          phone: normalizedPhone,
+          addresses: {
+            create: data.addresses,
+          },
+        },
+        include: { addresses: true },
+      })
+    })
+
+    console.log('✅ Cliente atualizado com sucesso:', client.id)
+    return { success: true, data: client }
+  } catch (error) {
+    console.error('❌ Erro ao atualizar cliente:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+    return { success: false, error: errorMessage }
+  }
+}
+
+// ✅ Buscar cliente por ID (com formatação correta da data)
 export const formActionGetClientById = async (id: string): Promise<ActionResult> => {
   try {
+    console.log('🔍 Buscando cliente por ID:', id)
+
     const client = await db.client.findUnique({
       where: { id },
       include: { addresses: true },
@@ -131,51 +196,16 @@ export const formActionGetClientById = async (id: string): Promise<ActionResult>
       return { success: false, error: 'Cliente não encontrado' }
     }
 
-    return { success: true, data: client }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
-    return { success: false, error: errorMessage }
-  }
-}
-
-// ✅ Editar cliente
-export const formActionUpdateClient = async (
-  id: string,
-  data: ClienteFormData
-): Promise<ActionResult> => {
-  try {
-    // Converter data corretamente
-    const parsedBirthDate = parseDateToDateObj(data.birthDate)
-    if (!parsedBirthDate) {
-      return { success: false, error: 'Data de nascimento inválida.' }
+    // Formatar data para o formulário
+    const formattedClient = {
+      ...client,
+      birthDate: formatBirthDateForForm(client.birthDate),
     }
 
-    const updated = await db.client.update({
-      where: { id },
-      data: {
-        name: data.name,
-        cpfCnpj: data.cpfCnpj.replace(/\D/g, ''), // Normalizar CPF/CNPJ também no update
-        birthDate: parsedBirthDate, // Usar a data corretamente parseada
-        email: data.email.trim().toLowerCase(), // Normalizar email também no update
-        phone: data.phone,
-        addresses: {
-          deleteMany: {},
-          create: data.addresses.map(addr => ({
-            cep: addr.cep,
-            street: addr.street,
-            city: addr.city,
-            state: addr.state,
-            number: addr.number,
-            complement: addr.complement,
-            neighborhood: addr.neighborhood,
-          })),
-        },
-      },
-      include: { addresses: true },
-    })
-
-    return { success: true, data: updated }
+    console.log('✅ Cliente encontrado:', client.id)
+    return { success: true, data: formattedClient }
   } catch (error) {
+    console.error('❌ Erro ao buscar cliente:', error)
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
     return { success: false, error: errorMessage }
   }
@@ -184,10 +214,16 @@ export const formActionUpdateClient = async (
 // ✅ Deletar cliente
 export const formActionDeleteClient = async (id: string): Promise<ActionResult> => {
   try {
-    await db.client.delete({ where: { id } })
+    console.log('🗑️ Deletando cliente:', id)
 
-    return { success: true }
+    const client = await db.client.delete({
+      where: { id },
+    })
+
+    console.log('✅ Cliente deletado com sucesso:', client.id)
+    return { success: true, data: client }
   } catch (error) {
+    console.error('❌ Erro ao deletar cliente:', error)
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
     return { success: false, error: errorMessage }
   }

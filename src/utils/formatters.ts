@@ -1,4 +1,6 @@
 export const formatCpfCnpj = (value: string): string => {
+  if (!value) return ''
+
   const digits = value.replace(/\D/g, '')
 
   if (digits.length <= 11) {
@@ -17,81 +19,93 @@ export const formatCpfCnpj = (value: string): string => {
   }
 }
 
-export const formatPhone = (value: string): string => {
-  const digits = value.replace(/\D/g, '')
-
-  if (digits.length === 11) {
-    // Celular: (00) 90000-0000
-    return digits.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3')
-  } else if (digits.length === 10) {
-    // Fixo: (00) 0000-0000
-    return digits.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3')
-  }
-
-  return value
-}
-
 export const formatCep = (value: string): string => {
+  if (!value) return ''
+
   const digits = value.replace(/\D/g, '')
   return digits.replace(/^(\d{5})(\d{3})$/, '$1-$2')
 }
 
-// Função para converter string de data para objeto Date (corrigida)
-export const parseDateToDateObj = (dateStr: string): Date | null => {
-  if (!dateStr) return null
+export const formatPhone = (phone: string): string => {
+  if (!phone) return ''
 
-  // Se é formato DD/MM/YYYY
-  if (dateStr.includes('/')) {
-    const [day, month, year] = dateStr.split('/')
-    if (!day || !month || !year) return null
+  // Remove todos os caracteres não numéricos
+  const numbersOnly = phone.replace(/\D/g, '')
 
-    // Criar data local sem timezone issues
-    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
-    return date
+  // Aplica formatação baseada no tamanho
+  if (numbersOnly.length === 10) {
+    // (11) 1234-5678
+    return numbersOnly.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3')
+  } else if (numbersOnly.length === 11) {
+    // (11) 91234-5678
+    return numbersOnly.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')
   }
 
-  // Se já está em formato YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-    const [year, month, day] = dateStr.split('-')
-    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
-  }
-
-  // fallback
-  return new Date(dateStr)
+  return phone // Retorna original se não conseguir formatar
 }
 
-// Função melhorada para formatar data (evita problemas de timezone)
-export const formatDate = (value: string | Date): string => {
-  if (!value) return ''
+// Helper para normalizar telefone (apenas números)
+export const normalizePhone = (phone: string): string => {
+  return phone.replace(/\D/g, '')
+}
 
-  let date: Date
+export const formatDate = (date: string | Date | null): string => {
+  if (!date) return 'N/A'
 
-  if (typeof value === 'string') {
-    // Se vier do banco como string ISO, converter corretamente
-    if (value.includes('T')) {
-      date = new Date(value)
+  try {
+    let dateObj: Date
+
+    if (typeof date === 'string') {
+      // Se for string no formato ISO (do banco), criar sem conversão de timezone
+      if (date.includes('T') || date.includes('-')) {
+        // Formato ISO do banco: "1996-05-13T00:00:00.000Z"
+        // Extrair apenas a parte da data para evitar problemas de timezone
+        const datePart = date.split('T')[0] // "1996-05-13"
+        const [year, month, day] = datePart.split('-').map(Number)
+        dateObj = new Date(year, month - 1, day) // Criar data local
+      } else {
+        // Formato DD/MM/YYYY
+        const [day, month, year] = date.split('/').map(Number)
+        dateObj = new Date(year, month - 1, day)
+      }
     } else {
-      date = new Date(value)
+      dateObj = new Date(date)
     }
-  } else {
-    date = value
+
+    // Verificar se a data é válida
+    if (isNaN(dateObj.getTime())) {
+      return 'Data inválida'
+    }
+
+    // Formatar como DD/MM/YYYY usando métodos locais
+    const day = dateObj.getDate().toString().padStart(2, '0')
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0')
+    const year = dateObj.getFullYear().toString()
+
+    return `${day}/${month}/${year}`
+  } catch (error) {
+    console.error('Erro ao formatar data:', error)
+    return 'Data inválida'
   }
-
-  if (isNaN(date.getTime())) return ''
-
-  // Usar getDate(), getMonth() e getFullYear() para evitar problemas de timezone
-  const day = date.getDate().toString().padStart(2, '0')
-  const month = (date.getMonth() + 1).toString().padStart(2, '0')
-  const year = date.getFullYear()
-
-  return `${day}/${month}/${year}`
 }
 
 // Função específica para converter data para o formato do input date (YYYY-MM-DD)
 export const formatDateForInput = (value: string | Date): string => {
   if (!value) return ''
 
-  const date = typeof value === 'string' ? new Date(value) : value
+  let date: Date
+
+  if (typeof value === 'string') {
+    if (value.includes('/')) {
+      // DD/MM/YYYY -> Date
+      const [day, month, year] = value.split('/').map(Number)
+      date = new Date(year, month - 1, day)
+    } else {
+      date = new Date(value)
+    }
+  } else {
+    date = value
+  }
 
   if (isNaN(date.getTime())) return ''
 
