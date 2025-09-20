@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus } from 'lucide-react'
+import { NotepadText, Plus } from 'lucide-react'
 import Link from 'next/link'
 import type { JSX } from 'react'
 
@@ -12,12 +12,12 @@ interface TableHeaderProps {
 
 const TableHeader = ({ onCreateClient }: TableHeaderProps): JSX.Element => {
   return (
-    <div className="mb-4 flex items-center justify-between">
+    <div className="mb-4 flex w-full flex-col items-center justify-between lg:flex-row">
       <h2 className="text-2xl font-bold">Lista de Clientes</h2>
-      <div className="flex gap-2">
+      <div className="mt-2 flex w-full flex-col justify-end gap-2 lg:mt-0 lg:max-w-3xl lg:flex-row">
         <Button asChild variant="outline">
           <Link href="/dynamic-form/create-client">
-            <Plus className="mr-2 h-4 w-4" /> Formulário Completo
+            <NotepadText className="mr-2 h-4 w-4" /> Formulário Completo
           </Link>
         </Button>
         <Button variant="default" onClick={onCreateClient}>

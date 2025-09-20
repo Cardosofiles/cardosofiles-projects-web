@@ -34,7 +34,7 @@ export const projects: Project[] = [
     project: 'Analytics Dashboard',
     description: 'Dashboard interativo com gráficos e métricas em tempo real',
     technologies: ['Next.js', 'Chart.js', 'Prisma', 'WebSockets'],
-    link: '/analytics-dashboard',
+    link: '/dashboard-preview',
     image:
       'https://images.unsplash.com/photo-1531554694128-c4c6665f59c2?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     status: 'planned',
@@ -45,7 +45,7 @@ export const projects: Project[] = [
     project: 'E-commerce Platform',
     description: 'Plataforma de e-commerce completa com pagamentos integrados',
     technologies: ['Next.js', 'Stripe', 'Prisma', 'NextAuth'],
-    link: '/e-commerce',
+    link: '/dashboard-preview',
     image:
       'https://images.unsplash.com/photo-1713869791518-a770879e60dc?q=80&w=2333&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     status: 'planned',
@@ -56,7 +56,7 @@ export const projects: Project[] = [
     project: 'Task Manager',
     description: 'Sistema de gerenciamento de tarefas com colaboração em tempo real',
     technologies: ['Next.js', 'Socket.io', 'Prisma', 'Drag & Drop'],
-    link: '/task-manager',
+    link: '/dashboard-preview',
     image:
       'https://images.unsplash.com/photo-1599202860130-f600f4948364?q=80&w=2515&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     status: 'planned',
@@ -67,7 +67,7 @@ export const projects: Project[] = [
     project: 'Real-time Chat',
     description: 'Aplicativo de chat com salas, mensagens privadas e compartilhamento de arquivos',
     technologies: ['Next.js', 'Socket.io', 'Prisma', 'AWS S3'],
-    link: '/chat-app',
+    link: '/dashboard-preview',
     image:
       'https://images.unsplash.com/photo-1602081957921-9137a5d6eaee?q=80&w=2793&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     status: 'planned',
@@ -78,7 +78,7 @@ export const projects: Project[] = [
     project: 'Portfolio Builder',
     description: 'Ferramenta para criar portfólios profissionais de forma visual e intuitiva',
     technologies: ['Next.js', 'Drag & Drop', 'Canvas API', 'Prisma'],
-    link: '/portfolio-builder',
+    link: '/dashboard-preview',
     image:
       'https://images.unsplash.com/photo-1511984804822-e16ba72f5848?q=80&w=2048&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     status: 'planned',

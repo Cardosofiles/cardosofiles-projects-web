@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, ArrowRight, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Link2, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
 import React, {
@@ -247,6 +247,10 @@ export const Card = ({
           >
             {card.title}
           </motion.p>
+          <p className="mt-2 flex cursor-pointer items-center justify-start gap-2 font-semibold">
+            <Link2 className="h-4 w-4" />
+            Acesse o projeto aqui
+          </p>
         </div>
         <BlurImage src={card.src} alt={card.title} className="absolute inset-0 z-10 object-cover" />
       </motion.button>
@@ -274,7 +278,7 @@ export const BlurImage = ({
   return (
     <Image
       className={cn(
-        'h-full w-full object-cover transition duration-300',
+        'h-full w-full cursor-pointer object-cover transition duration-300',
         isLoading ? 'blur-sm' : 'blur-0',
         className
       )}

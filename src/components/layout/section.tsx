@@ -1,6 +1,6 @@
 'use client'
 
-import { projects } from '@/data/projects'
+import { projects } from '@/data/dynamic-form/projects'
 import Link from 'next/link'
 
 import { Badge } from '@/components/ui/badge'
