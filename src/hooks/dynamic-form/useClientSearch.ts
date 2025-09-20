@@ -1,6 +1,8 @@
-import type { SearchFilters } from '@/components/dynamic-form/table/table-search'
-import type { Client } from '@/types'
 import { useMemo, useState } from 'react'
+
+import type { SearchFilters } from '@/components/dynamic-form/table/table-search'
+
+import type { Client } from '@/types'
 
 export const useClientSearch = (clients: Client[] = []) => {
   const [searchFilters, setSearchFilters] = useState<SearchFilters | null>(null)

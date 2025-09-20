@@ -1,6 +1,8 @@
-import { formActionGetClientById } from '@/actions/dynamic-form/form'
-import type { Client } from '@/types'
 import { useState } from 'react'
+
+import { formActionGetClientById } from '@/actions/dynamic-form/form'
+
+import type { Client } from '@/types'
 
 export const useClientTable = () => {
   const [isEditing, setIsEditing] = useState(false)

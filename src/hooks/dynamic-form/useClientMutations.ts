@@ -1,7 +1,11 @@
-import { formActionDeleteClient } from '@/actions/dynamic-form/form'
-import type { ClienteFormData } from '@/schemas'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+
+import { formActionDeleteClient } from '@/actions/dynamic-form/form'
+
 import { useCreateClient } from './useCreateClient'
+import { useUpdateClient } from './useUpdateClient'
+
+import type { ClienteFormData } from '@/schemas'
 
 interface ErrorWithMessage {
   message?: string
@@ -29,6 +33,7 @@ export const useDeleteClient = () => {
 
 export const useCreateUpdateClient = () => {
   const createClient = useCreateClient()
+  const updateClient = useUpdateClient()
 
   return {
     mutate: (
@@ -52,10 +57,27 @@ export const useCreateUpdateClient = () => {
           onError: (error: ErrorWithMessage) => options?.onError?.(error),
         })
       } else {
-        // Para edição, usar a lógica existente
-        // ...existing update logic...
+        // Para edição, usar o hook de update
+        if (!params.clientId) {
+          options?.onError?.({ message: 'ID do cliente não fornecido para edição' })
+          return
+        }
+
+        updateClient.mutate(
+          { id: params.clientId, data: params.data },
+          {
+            onSuccess: result => {
+              if (result.success) {
+                options?.onSuccess?.()
+              } else {
+                options?.onError?.({ message: result.error })
+              }
+            },
+            onError: (error: ErrorWithMessage) => options?.onError?.(error),
+          }
+        )
       }
     },
-    isPending: createClient.isPending,
+    isPending: createClient.isPending || updateClient.isPending,
   }
 }

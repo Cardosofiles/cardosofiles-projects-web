@@ -100,9 +100,9 @@ const CreateEditModal = ({
               </Button>
 
               <Button
-                type="submit"
+                type="button" // Mudou para "button" para usar onClick
                 disabled={isLoading}
-                onClick={methods.handleSubmit(onSubmit)}
+                onClick={methods.handleSubmit(onSubmit)} // Força o submit do form
                 className="flex-1 md:flex-none"
               >
                 {isLoading ? (

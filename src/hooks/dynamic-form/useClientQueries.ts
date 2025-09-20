@@ -1,6 +1,8 @@
-import { formActionGetClient, formActionGetClientById } from '@/actions/dynamic-form/form'
-import type { Client } from '@/types'
 import { useQuery } from '@tanstack/react-query'
+
+import { formActionGetClient, formActionGetClientById } from '@/actions/dynamic-form/form'
+
+import type { Client } from '@/types'
 
 export const useClientList = () => {
   return useQuery<Client[]>({

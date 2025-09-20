@@ -55,6 +55,8 @@ const TableListClient = (): JSX.Element => {
   }
 
   const handleOnSubmit = (data: ClienteFormData) => {
+    console.log('🚀 Submitting form:', { data, isCreating, clientId: selectedClient?.id })
+
     updateMutation.mutate(
       {
         data,
